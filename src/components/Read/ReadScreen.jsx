@@ -7,11 +7,12 @@ import { useForm } from "../../hooks/useForm";
 import { emailChecker } from "../../helpers/reviewEmail";
 import { useDispatch, useSelector } from "react-redux";
 import { readUser, readUsers } from "../../reducers/thunks";
+import { ACTIONS } from "../../actions/actions";
 
 export const ReadScreen = () => {
   const dispatch = useDispatch();
   const {
-    user: { users },
+    user: { user },
   } = useSelector((state) => state);
 
   const [values, handleInputChange, handleInputReset, reset] = useForm({
@@ -24,8 +25,9 @@ export const ReadScreen = () => {
     const { user_id, user_name, email, phone } = values;
 
     user_id === "" && user_name === "" && email === "" && phone === ""
-      ? dispatch(readUsers())
-      : dispatch(readUser(values));
+      ? dispatch(readUsers()) &&
+        dispatch({ type: ACTIONS.ACTIVE_RESULTS, payload: true })
+      : dispatch(readUser(values)) && dispatch({ type: ACTIONS.ACTIVE_RESULTS, payload: true });
   };
   const reviewEmail = (e) => {
     !emailChecker.test(e.target.value)
@@ -103,7 +105,7 @@ export const ReadScreen = () => {
           </div>
         </div>
         <div className="readCard__results">
-          <Results kindOfRequest="read" users={users} />
+          <Results kindOfRequest="read" usuario={user} />
         </div>
       </section>
     </div>

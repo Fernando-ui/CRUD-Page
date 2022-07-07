@@ -2,24 +2,37 @@ import { ACTIONS } from "../actions/actions";
 
 const initialState = {
   users: [],
-  user:[]
+  user: [],
+  isResultsActive: false,
 };
 
 export const userReducer = (state = initialState, action) => {
   switch (action.type) {
-    case ACTIONS.ADD_USER:
-      return {};
     case ACTIONS.READ_USER:
+      console.log(action.payload,'Tenemos al usuario');
+      
       return {
+        ...state,
+        user: action.payload,
+      };
+    case ACTIONS.READ_USERS:
+      
+      return {
+        ...state,
         users: action.payload,
       };
     case ACTIONS.UPDATE_USER:
       return {
         ...state,
-        user: action.payload
+        user: action.payload,
       };
-    case ACTIONS.DELETE_USER:
-      return {};
+
+    case ACTIONS.ACTIVE_RESULTS:
+      return {
+        ...state,
+        isResultsActive: action.payload,
+      };
+
     default:
       return { state };
   }

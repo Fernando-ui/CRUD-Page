@@ -1,29 +1,52 @@
-import React, { useState } from "react";
-import { ACTIONS } from "../../actions/actions";
 import { useDispatch, useSelector } from "react-redux";
-import "../../sass/layout/readResults.scss";
-import { Modal } from "../Modal";
+import React, { useState } from "react";
+import Swal from "sweetalert2";
 
-export const Results = ({ kindOfRequest, users }) => {
-  
-  const [modalState, setModalState] = useState(false);
+import "../../sass/layout/readResults.scss";
+import { ACTIONS } from "../../actions/actions";
+import { Modal } from "../Modal";
+import { deleteUser, readUsers } from "../../reducers/thunks";
+
+export const Results = ({ kindOfRequest, usuario }) => {
   const dispatch = useDispatch();
+  const { isResultsActive } = useSelector((state) => state.user);
+  const respuesta = useSelector((state) => state);
+  console.log(respuesta, "respuesta use selector");
+
+  const [modalState, setModalState] = useState(false);
 
   const handleEdit = (e, user) => {
     setModalState(true);
-    dispatch({type:ACTIONS.UPDATE_USER,payload:user});
+    dispatch({ type: ACTIONS.UPDATE_USER, payload: user });
   };
-  
+  const handleDelete = (e, user) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `You will delete ${user.user_name}`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#726D84",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteUser(user));
+        dispatch({ type: ACTIONS.ACTIVE_RESULTS, payload: false });
+        Swal.fire("Deleted!", "Your file has been deleted.", "success");
+      }
+    });
+  };
   return (
     <>
-        <Modal
-          title={"Edit"}
-          modalState={modalState}
-          setModalState={setModalState}
-        />
+      <Modal
+        title={"Edit"}
+        modalState={modalState}
+        setModalState={setModalState}
+      />
       <table className={`${kindOfRequest}Card__table`}>
         <tbody>
           <tr>
+            <th>id</th>
             <th>name</th>
             <th>last name</th>
             <th>email</th>
@@ -35,12 +58,13 @@ export const Results = ({ kindOfRequest, users }) => {
               <th>Delete</th>
             ) : null}
           </tr>
-          {users ? (
+          {usuario && isResultsActive ? (
             React.Children.toArray(
-              users.map((user, i) => {
+              usuario.map((user, i) => {
                 return (
                   <>
                     <tr>
+                      <td>{user.user_id}</td>
                       <td>{user.user_name}</td>
                       <td>{user.last_name}</td>
                       <td>{user.email}</td>
@@ -54,7 +78,12 @@ export const Results = ({ kindOfRequest, users }) => {
                           edit
                         </td>
                       ) : kindOfRequest === "delete" ? (
-                        <td className="deleteCard__button-delete">delete</td>
+                        <td
+                          onClick={(e) => handleDelete(e, user)}
+                          className="deleteCard__button-delete"
+                        >
+                          delete
+                        </td>
                       ) : null}
                     </tr>
                   </>

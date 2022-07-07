@@ -13,21 +13,30 @@ const createUser = (userInfo = {}) => {
 };
 
 const updateUser = (userInfo = {}) => {
-  console.log(userInfo,'Tenemos la informacion desde el updateuser');
+  
   return async () => {
-    const respuesta = await fetch(`http://localhost:8000/api/usuarios/${userInfo.user_id}`, {
+    await fetch(`http://localhost:8000/api/usuarios/${userInfo.user_id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(userInfo),
     });
-    console.log(await respuesta.json(),'Tenemos respuesta desde updateuser');
+  };
+};
+const deleteUser = (userInfo = {}) => {
+  return async () => {
+    await fetch(`http://localhost:8000/api/usuarios/${userInfo.user_id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   };
 };
 
-const readUsers = (userInfo = {}) => {
-  console.log('Entrando a users');
+const readUsers = () => {
+  console.log('Entrando a readusers');
   return async (dispatch) => {
     const answer = await fetch(`http://localhost:8000/api/usuarios/`, {
       method: "GET",
@@ -55,8 +64,9 @@ const readUser = (userInfo = {}) => {
         user.email === userInfo.email ||
         user.phone === userInfo.phone
     );
+    console.log(user, 'user');
     dispatch({ type: ACTIONS.READ_USER, payload: user });
   };
 };
 
-export { createUser, updateUser, readUser, readUsers };
+export { createUser, updateUser, readUser, readUsers, deleteUser };

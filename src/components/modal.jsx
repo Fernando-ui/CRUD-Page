@@ -1,9 +1,9 @@
 import { useForm } from "../hooks/useForm";
 import "../sass/components/modal.scss";
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateUser } from "../reducers/thunks";
+import { readUser, readUsers, updateUser } from "../reducers/thunks";
 import Swal from "sweetalert2";
+import { ACTIONS } from "../actions/actions";
 
 export const Modal = ({ title, modalState, setModalState }) => {
   const dispatch = useDispatch();
@@ -11,7 +11,7 @@ export const Modal = ({ title, modalState, setModalState }) => {
     user: { user },
   } = useSelector((state) => state);
 
-  const [values, handleInputChange, handleInputReset, reset] = useForm({
+  const [values, handleInputChange, , reset] = useForm({
     user_name: "",
     email: "",
     phone: "",
@@ -20,20 +20,45 @@ export const Modal = ({ title, modalState, setModalState }) => {
   const { user_name, email, phone, last_name } = values;
 
   const handleSaveUser = () => {
-    user_name === "" && email === "" && phone === "" && last_name === ""
-      ? Swal.fire({
-          title: "Error",
-          text: "Please, fill at least one field",
-          icon: "error",
-          confirmButtonText: "Ok",
-          confirmButtonColor: "#726D84",
-        })
-      : dispatch(updateUser({ ...values }));
-  };
+    let obj = {};
+    for (let i in values) {
+      if (values[i] !== "") {
+        obj = { ...obj, [i]: values[i] };
+      }
+    }
 
+    if (user_name === "" && email === "" && phone === "" && last_name === "") {
+      Swal.fire({
+        title: "Error",
+        text: "Please, fill at least one field",
+        icon: "error",
+        confirmButtonText: "Ok",
+        confirmButtonColor: "#726D84",
+      });
+    } else {
+      dispatch(
+        updateUser({
+          ...user,
+          ...obj,
+        })
+      );
+      setModalState(false);
+      reset();
+      dispatch(readUsers());
+      dispatch({ type: ACTIONS.ACTIVE_RESULTS, payload: false });
+      Swal.fire({
+        title: "The user has been updated",
+        text: `The user ${user.user_name} has been updated`,
+        icon: "success",
+        confirmButtonText: "Ok",
+        confirmButtonColor: "#726D84",
+      });
+    }
+  };
 
   const setModalFalse = () => {
     setModalState(false);
+
     reset();
   };
 
@@ -80,6 +105,8 @@ export const Modal = ({ title, modalState, setModalState }) => {
                   type="text"
                   name="last_name"
                   id="last_name"
+                  onChange={handleInputChange}
+                  value={values.last_name}
                   className="modal__input"
                 />
               </div>
@@ -89,6 +116,8 @@ export const Modal = ({ title, modalState, setModalState }) => {
                   placeholder={user.email}
                   type="text"
                   id="email"
+                  value={values.email}
+                  onChange={handleInputChange}
                   name="email"
                   className="modal__input"
                 />
@@ -100,6 +129,8 @@ export const Modal = ({ title, modalState, setModalState }) => {
                   type="text"
                   id="phone"
                   name="phone"
+                  onChange={handleInputChange}
+                  value={values.phone}
                   className="modal__input"
                 />
               </div>
